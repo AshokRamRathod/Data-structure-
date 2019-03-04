@@ -8,8 +8,9 @@
   "schemes": [
     "https"
   ],
-  "host": "api.runscope.com",
+  "ClientKey": "89b549c3-fb44-475c-95df-f30fc7053d69",
   "Base_URL": "https://api.engagedly.com",
+  "Content-Type": "application/json",
   "securityDefinitions": {
     "runscope_auth": {
       "type": "oauth2",
