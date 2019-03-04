@@ -1,0 +1,1787 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "QA ENVIRONMENT",
+    "description": "Manage Runscope programmatically.",
+    "version": "1.0.0"
+  },
+  "schemes": [
+    "https"
+  ],
+  "host": "api.runscope.com",
+  "Base_URL": "https://api.engagedly.com",
+  "securityDefinitions": {
+    "runscope_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://www.runscope.com/signin/oauth/authorize",
+      "tokenUrl": "https://www.runscope.com/signin/oauth/access_token",
+      "scopes": {
+        "api:read": "Default read access.",
+        "bucket:auth_token": "Allows you to read all bucket information, including Authenticated Buckets.",
+        "bucket:write": "Allows you to create new buckets on behalf of the user (up to their plan limit).",
+        "message:write": "Allows you to create new messages on behalf of the user (up to their plan limit).",
+        "account:email": "Allows you to read the email addresses of user accounts.",
+        "team:read": "Allows you to read team details such as lists of team members and external service integrations.",
+        "test:read": "Allows you to read the details of API tests.",
+        "test:write": "Allows you to create, update and delete details of API tests."
+      }
+    }
+  },
+  "security": [
+    {
+      "runscope_auth": [
+        "api:read"
+      ]
+    }
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/account": {
+      "get": {
+        "summary": "Account Resource",
+        "description": "Information about the authorized account.",
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "Account owner and team information.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/Account"
+                },
+                "meta": {
+                  "$ref": "#/definitions/Meta"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "account:email"
+            ]
+          }
+        ]
+      }
+    },
+    "/teams/{teamId}/people": {
+      "get": {
+        "summary": "Teams Resource",
+        "description": "List people and integrations associated with a given team.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/teamId"
+          }
+        ],
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of people associated with the team.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Account"
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "account:email",
+              "team:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/teams/{teamId}/integrations": {
+      "get": {
+        "summary": "Team integrations list",
+        "description": "Returns a list of integrations configured for the team.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/teamId"
+          }
+        ],
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of integrations associated with the team.",
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Integration"
+                  }
+                },
+                "meta": {
+                  "$ref": "#/definitions/Meta"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "team:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/teams/{teamId}/agents": {
+      "get": {
+        "summary": "Team agents list",
+        "description": "List currently connected agents associated with a given team.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/teamId"
+          }
+        ],
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of the team’s currently connected agents.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Agent"
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "team:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets": {
+      "get": {
+        "summary": "Returns a list of buckets.",
+        "tags": [
+          "Buckets"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of buckets associated with this authenticated account.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Bucket"
+                  }
+                },
+                "meta": {
+                  "$ref": "#/definitions/Meta"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read"
+            ]
+          },
+          {
+            "runscope_auth": [
+              "api:read",
+              "bucket:auth_token"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create a new bucket",
+        "tags": [
+          "Buckets"
+        ],
+        "parameters": [
+          {
+            "name": "NewBucket",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NewBucket"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bucket details.",
+            "schema": {
+              "$ref": "#/definitions/Bucket"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "bucket:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}": {
+      "get": {
+        "summary": "Returns a single bucket resource.",
+        "tags": [
+          "Buckets"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bucket details.",
+            "schema": {
+              "$ref": "#/definitions/Bucket"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a single bucket resource.",
+        "tags": [
+          "Buckets"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content with no body."
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "bucket:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}/messages": {
+      "get": {
+        "summary": "Retrieve a list of messages in a bucket",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "description": "Maxiumum number of messages to return. Default 50, max 1000."
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "type": "integer",
+            "description": "Only return messages after the given Unix timestamp"
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "type": "integer",
+            "description": "Only return messages before the given Unix timestamp"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messages in a bucket"
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Clear a bucket (remove all messages).",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content with no body."
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "message:write"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create a message",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "name": "NewMessage",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NewMessage"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The response includes a list of result objects for the message(s) submitted. It will always return an array, even if only one message was created. The order of the result objects corresponds to the order of messages submitted.",
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "status": {
+                        "description": "One of the following: success, error, or warning.",
+                        "type": "string"
+                      },
+                      "unique_identifier": {
+                        "description": "If the message had a unique_identifier, it will be returned in this field, to help match the responses to the messages that were submitted.",
+                        "type": "string"
+                      },
+                      "uuid": {
+                        "description": "This message's Runscope-generated ID.",
+                        "type": "string"
+                      },
+                      "warning": {
+                        "description": "An object representing warnings (non-fatal warnings) for this item. Only present if status is warning, otherwise this will be null.",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "integer",
+                            "description": "A numeric error code for the specific problem we encountered with this message. (warning status only)"
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "A description of the problem we encountered with this message. (warning status only)"
+                          },
+                          "more_info": {
+                            "type": "string",
+                            "description": "A link to more help about the warning. (warning status only)"
+                          }
+                        }
+                      },
+                      "error": {
+                        "description": "An object representing errors for this item. Only present if status is error, otherwise this will be null.",
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "integer",
+                            "description": "A numeric error code for the specific problem we encountered with this message. (error status only)"
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "A description of the problem we encountered with this message. (error status only)"
+                          },
+                          "more_info": {
+                            "type": "string",
+                            "description": "A link to more help about the warning. (error status only)"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "succcess_count": {
+                      "type": "integer"
+                    },
+                    "warning_count": {
+                      "type": "integer"
+                    },
+                    "error_count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "message:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}/errors": {
+      "get": {
+        "summary": "Retrieve a list of error messages in a bucket",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "description": "Maxiumum number of messages to return. Default 50, max 1000."
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "type": "integer",
+            "description": "Only return messages after the given Unix timestamp"
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "type": "integer",
+            "description": "Only return messages before the given Unix timestamp"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of error messages in a bucket"
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        }
+      }
+    },
+    "/buckets/{bucketKey}/messages/{messageId}": {
+      "get": {
+        "summary": "Retrieve the details for a single message.",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "description": "The unique identifier for this message",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messages in a bucket"
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        }
+      }
+    },
+    "/buckets/{bucketKey}/tests": {
+      "get": {
+        "summary": "Returns a list of tests.",
+        "tags": [
+          "Tests"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tests for this bucket",
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Test"
+                  }
+                },
+                "meta": {
+                  "$ref": "#/definitions/Meta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:read"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create a test.",
+        "tags": [
+          "Tests"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "name": "NewTest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Test"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tests for this bucket",
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Test"
+                  }
+                },
+                "meta": {
+                  "$ref": "#/definitions/Meta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}/tests/{testId}": {
+      "get": {
+        "summary": "Retrieve the details of a given test by ID.",
+        "tags": [
+          "Tests"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns an object with the details of the given test.",
+            "schema": {
+              "$ref": "#/definitions/TestDetail"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:read"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "summary": "Modify a test's name, description, default environment and its steps. To modify other individual properties of a test, make requests to the steps, environments, and schedules subresources of the test.",
+        "tags": [
+          "Tests"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Returns 201 and the updated test's JSON description if the test is successfully updated.",
+            "schema": {
+              "$ref": "#/definitions/TestDetail"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/UnexpectedError"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:write"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete a test, including all steps, schedules, test-specific environments and results.",
+        "tags": [
+          "Tests"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content with no body."
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}/tests/{testId}/steps": {
+      "get": {
+        "summary": "List test steps for a test.",
+        "tags": [
+          "Test Steps"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of test steps for a test"
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:read"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Add new test step.",
+        "tags": [
+          "Test Steps"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          },
+          {
+            "name": "TestStep",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TestStep"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Details of the new test step."
+          },
+          "400": {
+            "description": "Must send valid JSON object to create a new test step",
+            "schema": {
+              "$ref": "#/definitions/StandardError"
+            }
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}/tests/{testId}/steps/{stepId}": {
+      "put": {
+        "summary": "Update the details of a single test step.",
+        "tags": [
+          "Test Steps"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          },
+          {
+            "$ref": "#/parameters/stepId"
+          },
+          {
+            "name": "TestStep",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TestStep"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of test steps for a test"
+          },
+          "400": {
+            "description": "Unable to update template '{stepId}' for test '{testId}'",
+            "schema": {
+              "$ref": "#/definitions/StandardError"
+            }
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:write"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete a step from a test.",
+        "tags": [
+          "Test Steps"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          },
+          {
+            "$ref": "#/parameters/stepId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content with no body."
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}/tests/{testId}/environments": {
+      "get": {
+        "summary": "Return details of the test's environments (only those that belong to the specified test)",
+        "tags": [
+          "Test Environments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of environments belonging to this test.",
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Environment"
+                  }
+                },
+                "meta": {
+                  "$ref": "#/definitions/Meta"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:read"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create new test environment.",
+        "tags": [
+          "Test Environments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          },
+          {
+            "name": "NewEnvironment",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Environment"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Details of the new test environment."
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}/tests/{testId}/environments/{environmentId}": {
+      "put": {
+        "summary": "Update the details of a test environment.",
+        "tags": [
+          "Test Environments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          },
+          {
+            "$ref": "#/parameters/environmentId"
+          },
+          {
+            "name": "ModifiedEnvironment",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Environment"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Details of the modified test environment."
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}/tests/{testId}/metrics": {
+      "get": {
+        "summary": "Return details of the test metrics for the specified timeframe.",
+        "tags": [
+          "Tests"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/testId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of average response times and additional performance metrics belonging to this test.",
+            "schema": {
+              "$ref": "#/definitions/Metrics"
+            }
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}/environments": {
+      "get": {
+        "summary": "Returns list of shared environments for a specified bucket.",
+        "tags": [
+          "Shared Environments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of shared environments belonging to this bucket."
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:read"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create new shared environment.",
+        "tags": [
+          "Shared Environments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "name": "NewEnvironment",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Environment"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Details of the new test environment."
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:write"
+            ]
+          }
+        ]
+      }
+    },
+    "/buckets/{bucketKey}/environments/{environmentId}": {
+      "put": {
+        "summary": "Update the details of a shared environment.",
+        "tags": [
+          "Shared Environments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/bucketKey"
+          },
+          {
+            "$ref": "#/parameters/environmentId"
+          },
+          {
+            "name": "ModifiedEnvironment",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Environment"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Details of the modified test environment."
+          }
+        },
+        "security": [
+          {
+            "runscope_auth": [
+              "api:read",
+              "test:write"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Meta": {
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Success or failure status of call."
+        }
+      }
+    },
+    "Account": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the person for this account."
+        },
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this account."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address for this account. Only present if authorized with the account:email scope."
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Team"
+          }
+        }
+      }
+    },
+    "Team": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this team."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of this team."
+        }
+      }
+    },
+    "Bucket": {
+      "properties": {
+        "auth_token": {
+          "description": "Bucket auth token if set, otherwise this value is null.",
+          "type": "string"
+        },
+        "default": {
+          "description": "True if this bucket is the 'default' for a team. Default buckets cannot be deleted.",
+          "type": "boolean"
+        },
+        "key": {
+          "description": "The unique identifier used to address a bucket.",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of this bucket as displayed in your dashboard.",
+          "type": "string"
+        },
+        "team": {
+          "$ref": "#/definitions/Team"
+        },
+        "trigger_url": {
+          "type": "string"
+        },
+        "verify_ssl": {
+          "description": "True if this bucket is configured to verify ssl for requests made to it.",
+          "type": "boolean"
+        },
+        "tests_url": {
+          "type": "string"
+        },
+        "collections_url": {
+          "type": "string"
+        },
+        "messages_url": {
+          "type": "string"
+        }
+      }
+    },
+    "NewBucket": {
+      "required": [
+        "name",
+        "team_id"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name of this bucket",
+          "type": "string"
+        },
+        "team_id": {
+          "description": "Unique identifier for the team to create this bucket for.",
+          "type": "string"
+        }
+      }
+    },
+    "NewMessage": {
+      "properties": {
+        "request": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "description": "HTTP method name (GET, POST, PUT, HEAD, OPTIONS, PATCH, DELETE, etc.)"
+            },
+            "url": {
+              "type": "string",
+              "description": "Full URL of the request, including URL querystring parameters."
+            },
+            "headers": {
+              "type": "string",
+              "description": "JSON object of header keys and values -- with values as a string or an array of strings."
+            },
+            "form": {
+              "type": "string",
+              "description": "JSON object of set of form fields included in a POST request. \nValues can either be represented as a string or as an array of strings.\n"
+            },
+            "body": {
+              "type": "string",
+              "description": "HTTP request body (most commonly used for POST and PUT requests). If the\nrequest body contains binary data that cannot be included directly in the \nJSON, encode the content with Base64 and include the body_encoding attribute accordingly.\n"
+            },
+            "body_encoding": {
+              "type": "string",
+              "description": "If the request body was encoded with Base64, this field should be present and set to \n\"base64\". If not specified, defaults to \"plaintext\"\n"
+            },
+            "timestamp": {
+              "type": "number",
+              "format": "float",
+              "description": "Unix timestamp indicating when the request was made."
+            }
+          }
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "integer",
+              "description": "HTTP status code returned in the response."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Textual description of HTTP status code. This will be set automatically if not \nprovided in the API call. For example, if the status code is 404, this will be \nset to \"Not Found\" unless you explicitly specify a different reason.\n"
+            },
+            "headers": {
+              "type": "string",
+              "description": "JSON object of header keys and values -- with values as a string or an array of strings."
+            },
+            "body": {
+              "type": "string",
+              "description": "HTTP response body. If the response body contains binary data that cannot be\nincluded directly in the JSON, you should encode the content with Base64.\n"
+            },
+            "body_encoding": {
+              "type": "string",
+              "description": "If the request body was encoded with Base64, this field should be present and set to \n\"base64\". If not specified, defaults to \"plaintext\"\n"
+            },
+            "response_time": {
+              "type": "number",
+              "format": "float",
+              "description": "Length of time it took to receive the response, in seconds."
+            },
+            "timestamp": {
+              "type": "number",
+              "format": "float",
+              "description": "Unix timestamp indicating when the request was made."
+            }
+          }
+        }
+      }
+    },
+    "TestStep": {
+      "properties": {
+        "step_type": {
+          "type": "string",
+          "description": "Type of test step -- request, pause, condition, ghost-inspector, or subtest."
+        }
+      }
+    },
+    "TestStepRequest": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The URL to make a request to for this step. This may contain both query string parameters and variables."
+            },
+            "method": {
+              "type": "string",
+              "description": "The HTTP method for this request step. E.g. GET, POST, PUT, DELETE, etc."
+            },
+            "note": {
+              "type": "string",
+              "description": "A description or note for this request step."
+            },
+            "auth": {
+              "type": "object",
+              "description": "An authentication object with either basic, oauth1, or client_certificate credentials for authenticating this request."
+            },
+            "headers": {
+              "type": "object",
+              "description": "An object with keys as header names matched to their values. Values can either be a single string or an array of strings."
+            },
+            "form": {
+              "type": "object",
+              "description": "An object with keys as form post parameter names matched to their values. Values can either be a single string or an array of strings."
+            },
+            "body": {
+              "type": "string",
+              "description": "A string to use as the body of the request."
+            },
+            "assertions": {
+              "type": "array",
+              "description": "A list of assertions to apply to the HTTP response from this request.",
+              "items": {
+                "$ref": "#/definitions/Assertion"
+              }
+            },
+            "variables": {
+              "type": "array",
+              "description": "A list of variables to extract out of the HTTP response from this request.",
+              "items": {
+                "$ref": "#/definitions/Variable"
+              }
+            },
+            "scripts": {
+              "type": "array",
+              "description": "A list of post-response scripts to run after this request.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "before_scripts": {
+              "type": "array",
+              "description": "A list of pre-request scripts to run before this request.",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/TestStep"
+        }
+      ]
+    },
+    "Environment": {
+      "type": "object",
+      "properties": {
+        "integrations": {
+          "type": "array",
+          "description": "The list of integrations for this environment.",
+          "items": {
+            "$ref": "#/definitions/Integration"
+          }
+        },
+        "verify_ssl": {
+          "type": "boolean",
+          "description": "Validate all SSL certificates on any HTTPS connections."
+        },
+        "script_library": {
+          "type": "array",
+          "description": "The list of ids for scripts, part of the script libraries, being used for this environment.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this environment."
+        },
+        "script": {
+          "type": "string",
+          "description": ""
+        },
+        "regions": {
+          "type": "array",
+          "description": "An array of the region codes that this environment is using.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "type": "string"
+        },
+        "stop_on_failure": {
+          "type": "boolean",
+          "description": "Stop executing the test after the first failed step."
+        },
+        "initial_script_hash": {
+          "type": "string"
+        },
+        "auth": {
+          "type": "string"
+        },
+        "exported_at": {
+          "type": "integer"
+        },
+        "retry_on_failure": {
+          "type": "boolean"
+        },
+        "remote_agents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Agent"
+          }
+        },
+        "webhooks": {
+          "type": "string"
+        },
+        "test_id": {
+          "type": "string",
+          "description": "The unique identifier for this test."
+        },
+        "emails": {
+          "type": "object"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of this environment."
+        },
+        "initial_variables": {
+          "type": "object"
+        },
+        "headers": {
+          "type": "object"
+        },
+        "parent_environment_id": {
+          "type": "string"
+        },
+        "preserve_cookies": {
+          "type": "boolean"
+        },
+        "client_certificate": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "Test": {
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "created_at": {
+          "type": "integer",
+          "description": "The date the test was created in seconds (Unix time stamp format)."
+        },
+        "created_by": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "default_environment_id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description for the test."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name for the test."
+        },
+        "id": {
+          "type": "string"
+        },
+        "trigger_url": {
+          "type": "string"
+        },
+        "last_run": {
+          "type": "object"
+        }
+      }
+    },
+    "TestDetail": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "string"
+            },
+            "exported_at": {
+              "type": "integer"
+            },
+            "environments": {
+              "$ref": "#/definitions/Environment"
+            },
+            "schedules": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Schedule"
+              }
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "last_run": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/Test"
+        }
+      ]
+    },
+    "Integration": {
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      }
+    },
+    "Agent": {
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "The version for this agent."
+        },
+        "agent_id": {
+          "type": "string",
+          "description": "The unique identifier for this agent."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the agent set in the configuration file or with the command line flag."
+        }
+      }
+    },
+    "Metrics": {
+      "properties": {
+        "response_times": {
+          "type": "array",
+          "description": "The list of response times based on the timeframe of the request.",
+          "items": {
+            "properties": {
+              "success_ratio": {
+                "type": "integer",
+                "description": "1 if there's a successful request in this time interval, or 0 if there isn't."
+              },
+              "timestamp": {
+                "type": "integer",
+                "description": "The timestamp in Unix format for the specified timeframe."
+              },
+              "avg_response_time_ms": {
+                "type": "integer",
+                "description": "The average response time in miliseconds for all the requests for this test in this time interval."
+              }
+            }
+          }
+        },
+        "this_time_period": {
+          "type": "object",
+          "description": "The average response time for different percentiles for the request in the requested timeframe."
+        },
+        "changes_from_last_period": {
+          "type": "object",
+          "description": "The changes in average response time compared to the last period."
+        },
+        "environment_uuid": {
+          "type": "string",
+          "description": "The environment_uuid that filters this request."
+        },
+        "region": {
+          "type": "string",
+          "description": "The region that filters this request."
+        },
+        "timeframe": {
+          "type": "string",
+          "description": "The timeframe that filters this request."
+        }
+      }
+    },
+    "Error": {
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "string"
+        }
+      }
+    },
+    "Error400": {
+      "properties": {
+        "status": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "more_info": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "StandardError": {
+      "properties": {
+        "meta": {
+          "$ref": "#/definitions/Meta"
+        },
+        "data": {
+          "type": "object"
+        },
+        "error": {
+          "$ref": "#/definitions/Error400"
+        }
+      }
+    },
+    "Assertion": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "comparison": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "Variable": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "property": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "Schedule": {
+      "type": "object",
+      "properties": {
+        "environment_id": {
+          "type": "string"
+        },
+        "interval": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "exported_at": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "parameters": {
+    "teamId": {
+      "name": "teamId",
+      "in": "path",
+      "description": "Unique identifier for team",
+      "required": true,
+      "type": "string"
+    },
+    "bucketKey": {
+      "name": "bucketKey",
+      "in": "path",
+      "description": "Unique identifier for a bucket",
+      "required": true,
+      "type": "string"
+    },
+    "testId": {
+      "name": "testId",
+      "in": "path",
+      "type": "string",
+      "required": true,
+      "description": "Unique identifier for a test"
+    },
+    "stepId": {
+      "name": "stepId",
+      "in": "path",
+      "type": "string",
+      "required": true,
+      "description": "Unique identifier for a test step"
+    },
+    "environmentId": {
+      "name": "environmentId",
+      "in": "path",
+      "type": "string",
+      "required": true,
+      "description": "Unique identifier for a test environment"
+    }
+  },
+  "responses": {
+    "Standard400Response": {
+      "description": "Invalid request.",
+      "schema": {
+        "$ref": "#/definitions/StandardError"
+      }
+    },
+    "Standard403Response": {
+      "description": "Invalid or missing Authorization header",
+      "schema": {
+        "$ref": "#/definitions/StandardError"
+      }
+    },
+    "UnexpectedError": {
+      "description": "Unexpected error",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    }
+  }
+}
